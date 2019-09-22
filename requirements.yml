@@ -1,0 +1,17 @@
+---
+
+- name: trombik.hostname
+- name: trombik.vim
+- name: trombik.apt_repo
+- name: trombik.java
+- name: trombik.zsh
+- name: trombik.freebsd_pkg
+- name: trombik.tmux
+- name: trombik.hosts
+- name: trombik.git
+- name: trombik.sudo
+- name: trombik.grafana
+- name: trombik.mosquitto
+- name: trombik.influxdb
+- name: trombik.telegraf
+- name: trombik.openhab

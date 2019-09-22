@@ -1,0 +1,12 @@
+---
+freebsd_pkg_repo:
+  FreeBSD:
+    enabled: "false"
+    state: present
+  FreeBSD_latest:
+    enabled: "true"
+    state: present
+    url: pkg+https://pkg.FreeBSD.org/${ABI}/latest
+    signature_type: fingerprints
+    fingerprints: /usr/share/keys/pkg
+    mirror_type: srv
