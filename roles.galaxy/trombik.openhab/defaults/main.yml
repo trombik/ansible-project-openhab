@@ -1,0 +1,11 @@
+---
+openhab_user: "{{ __openhab_user }}"
+openhab_group: "{{ __openhab_group }}"
+openhab_extra_groups: []
+openhab_log_dir: "{{ __openhab_log_dir }}"
+openhab_db_dir: "{{ __openhab_db_dir }}"
+openhab_service: "{{ __openhab_service }}"
+openhab_package_name: "{{ __openhab_package_name }}"
+openhab_extra_packages: []
+openhab_conf_dir: "{{ __openhab_conf_dir }}"
+openhab_flags: ""

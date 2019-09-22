@@ -1,0 +1,57 @@
+---
+- hosts: server
+  become: yes
+  become_method: sudo
+  environment:
+    http_proxy: "{{ http_proxy | default() }}"
+    https_proxy: "{{ https_proxy | default() }}"
+    no_proxy: "{{ no_proxy | default() }}"
+
+  pre_tasks:
+  roles:
+    - role: trombik.apt_repo
+      when: ansible_os_family == 'Debian'
+    - role: trombik.java
+    - role: trombik.openhab
+  vars:
+    apt_repo_keys_to_add:
+      - https://repos.influxdata.com/influxdb.key
+      - https://bintray.com/user/downloadSubjectPublicKey?username=openhab
+    apt_repo_to_add:
+      - "deb https://openhab.jfrog.io/openhab/openhab-linuxpkg testing main"
+    apt_repo_enable_apt_transport_https: yes
+    java_packages: "{% if ansible_os_family == 'FreeBSD' %}[ 'java/openjdk8-jre' ]{% elif ansible_os_family == 'Debian' %}[ 'openjdk-8-jdk' ]{% endif %}"
+
+    openhab_configs:
+      - name: services/addons.cfg
+        state: present
+        content: |
+          package = standard,demo
+          remote = true
+          binding = astro,mqtt,ntp
+          ui = basic,paper
+          persistence = rrd4j
+          action = mail
+          transformation = jsonpath,map
+          voice = voicerss
+      - name: services/basicui.cfg
+        content: |
+          org.eclipse.smarthome.basicui:defaultSitemap=demo
+          org.eclipse.smarthome.basicui:iconType=svg
+      - name: services/classicui.cfg
+        content: |
+          org.eclipse.smarthome.classicui:defaultSitemap=demo
+      - name: services/logging.cfg
+        content: |
+          pattern=%date{ISO8601} - %-25logger: %msg%n
+      - name: services/rrd4j.cfg
+        content: ""
+      - name: services/runtime.cfg
+        content: |
+          org.eclipse.smarthome.core.localeprovider:language=en
+    flags_openhab:
+      FreeBSD: ""
+      Debian: |
+        EXTRA_JAVA_OPTS=""
+        OPENHAB_HTTP_PORT=8080
+    openhab_flags: "{{ flags_openhab[ansible_os_family] }}"

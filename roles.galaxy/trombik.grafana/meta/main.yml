@@ -1,0 +1,19 @@
+---
+galaxy_info:
+  role_name: grafana
+  author: Tomoyuki Sakurai
+  description: Configures grafana
+  company: N/A
+  license: BSD
+  min_ansible_version: 2.0
+  platforms:
+    - name: FreeBSD
+      versions:
+        - 12.0
+    - name: Ubuntu
+      version:
+        - bionic
+
+  galaxy_tags:
+    - grafana
+dependencies: []

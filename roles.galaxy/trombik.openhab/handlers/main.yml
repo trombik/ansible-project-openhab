@@ -1,0 +1,6 @@
+---
+
+- name: Restart openhab
+  service:
+    name: "{{ openhab_service }}"
+    state: restarted

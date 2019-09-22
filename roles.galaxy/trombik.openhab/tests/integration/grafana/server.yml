@@ -1,0 +1,270 @@
+---
+- hosts: server
+  become: yes
+  become_method: sudo
+  environment:
+    http_proxy: "{{ http_proxy | default() }}"
+    https_proxy: "{{ https_proxy | default() }}"
+    no_proxy: "{{ no_proxy | default() }}"
+
+  pre_tasks:
+  roles:
+    - role: trombik.apt_repo
+      when: ansible_os_family == 'Debian'
+    - role: trombik.java
+    - role: trombik.grafana
+    - role: trombik.influxdb
+    - role: trombik.telegraf
+    - role: ansible-role-openhab
+  vars:
+    apt_repo_enable_apt_transport_https: yes
+    apt_repo_keys_to_add:
+      # XXX bintray repo is broken.
+      # https://community.openhab.org/t/the-repository-https-dl-bintray-com-openhab-apt-repo2-stable-release-is-not-signed-raspberry-pi-3/60047/17
+      - https://bintray.com/user/downloadSubjectPublicKey?username=openhab
+      - https://repos.influxdata.com/influxdb.key
+      - https://packages.grafana.com/gpg.key
+    apt_repo_to_add:
+      - "deb https://openhab.jfrog.io/openhab/openhab-linuxpkg testing main"
+      - "deb https://repos.influxdata.com/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
+      - "deb https://packages.grafana.com/oss/deb stable main"
+    packages:
+      FreeBSD:
+        - java/openjdk8-jre
+      Debian:
+        - openjdk-8-jdk
+    java_packages: "{{ packages[ansible_os_family] }}"
+
+    # ____________________ openhab
+    extra_group:
+      FreeBSD: dialer
+      Debian: dialout
+    openhab_extra_groups:
+      - name: "{{ extra_group[ansible_os_family] }}"
+    openhab_configs:
+      - name: services/addons.cfg
+        state: present
+        content: |
+          package = standard
+          remote = true
+          binding = astro,mqtt,ntp
+          ui = basic,paper
+          persistence = rrd4j
+          action = mail
+          transformation = jsonpath,map
+          voice = voicerss
+      - name: services/basicui.cfg
+        content: |
+          org.eclipse.smarthome.basicui:defaultSitemap=demo
+          org.eclipse.smarthome.basicui:iconType=svg
+      - name: services/classicui.cfg
+        content: |
+          org.eclipse.smarthome.classicui:defaultSitemap=demo
+      - name: services/logging.cfg
+        content: |
+          pattern=%date{ISO8601} - %-25logger: %msg%n
+      - name: services/rrd4j.cfg
+        content: ""
+      - name: services/runtime.cfg
+        content: |
+          org.eclipse.smarthome.core.localeprovider:language=en
+      - name: services/foo.cfg
+        state: absent
+        content: |
+          org.eclipse.smarthome.core.localeprovider:language=en
+    flags_openhab:
+      FreeBSD: ""
+      Debian: |
+        EXTRA_JAVA_OPTS=
+        OPENHAB_HTTP_PORT=8080
+    openhab_flags: "{{ flags_openhab[ansible_os_family] }}"
+
+    # ____________________ influxdb
+    influxdb_admin_username: admin
+    influxdb_admin_password: PassWord
+    influxdb_tls: no
+    influxdb_include_x509_certificate: no
+    influxdb_bind_address: 127.0.0.1:8086
+    influxdb_databases:
+      - database_name: mydatabase
+        state: present
+    influxdb_users:
+      - user_name: write_only
+        user_password: write_only
+        grants:
+          - database: mydatabase
+            privilege: WRITE
+      - user_name: read_only
+        user_password: read_only
+        grants:
+          - database: mydatabase
+            privilege: READ
+    influxdb_config: |
+      reporting-disabled = true
+      # this one is bind address for backup process
+      bind-address = "127.0.0.1:8088"
+      [meta]
+        dir = "{{ influxdb_db_dir }}/meta"
+      [data]
+        dir = "{{ influxdb_db_dir }}/data"
+        wal-dir = "{{ influxdb_db_dir }}/wal"
+        query-log-enabled = true
+      [coordinator]
+      [retention]
+      [shard-precreation]
+      [monitor]
+      [http]
+        auth-enabled = true
+        bind-address = "{{ influxdb_bind_address }}"
+        https-enabled = false
+        log-enabled = true
+        access-log-path = "{{ influxdb_log_dir }}/access.log"
+      [ifql]
+      [logging]
+      [subscriber]
+      [[graphite]]
+      [[collectd]]
+      [[opentsdb]]
+      [[udp]]
+      [tls]
+
+    # ____________________ grafana
+    flags_grafana:
+      FreeBSD: 'grafana_conf="{{ grafana_conf_file }}"'
+      Debian: ""
+    grafana_plugins: []
+    grafana_flags: "{{ flags_grafana[ansible_os_family] }}"
+    grafana_admin_user: admin
+    grafana_admin_password: PassWord
+    grafana_addr: "{{ ansible_default_ipv4['address'] }}"
+    grafana_provisioning_files:
+      - name: datasources/influxdb.yml
+        state: present
+        content: |
+          apiVersion: 1
+          datasources:
+            - name: InfluxDB
+              type: influxdb
+              access: proxy
+              database: mydatabase
+              user: read_only
+              password: read_only
+              url: http://localhost:8086
+              jsonData:
+                httpMode: GET
+    grafana_config: |
+      [paths]
+      data = {{ grafana_db_dir }}
+      logs = {{ grafana_log_dir }}
+      plugins = /var/db/grafana/plugins
+      provisioning = {{ grafana_provisioning_dir }}
+      [server]
+      [database]
+      log_queries =
+      [session]
+      [dataproxy]
+      [analytics]
+      [security]
+      admin_user = {{ grafana_admin_user }}
+      admin_password = {{ grafana_admin_password }}
+      disable_gravatar = true
+      [snapshots]
+      [dashboards]
+      [users]
+      [auth]
+      [auth.anonymous]
+      [auth.github]
+      [auth.google]
+      [auth.generic_oauth]
+      [auth.grafana_com]
+      [auth.proxy]
+      [auth.basic]
+      enabled = true
+      [auth.ldap]
+      [smtp]
+      [emails]
+      [log]
+      [log.console]
+      [log.file]
+      [log.syslog]
+      [alerting]
+      [metrics]
+      [metrics.graphite]
+      [tracing.jaeger]
+      [grafana_com]
+      [external_image_storage]
+      [external_image_storage.s3]
+      [external_image_storage.webdav]
+      [external_image_storage.gcs]
+      [external_image_storage.azure_blob]
+      [external_image_storage.local]
+
+    # ____________________ mosquitto
+    mosquitto_bind_address: "{{ ansible_all_ipv4_addresses[1] }}"
+    mosquitto_config: |
+      user {{ mosquitto_user }}
+      pid_file {{ mosquitto_pid_file }}
+      bind_address {{ mosquitto_bind_address }}
+      port {{ mosquitto_port }}
+      log_dest syslog
+      autosave_interval 1800
+      persistence true
+      persistence_location {{ mosquitto_db_dir }}/
+      persistence_file mosquitto.db
+      log_dest syslog
+
+    # ____________________ telegraf
+    telegraf_config: |
+      [global_tags]
+      [agent]
+        interval = "10s"
+        round_interval = true
+        metric_batch_size = 1000
+        metric_buffer_limit = 10000
+        collection_jitter = "0s"
+        flush_interval = "10s"
+        flush_jitter = "0s"
+        precision = ""
+        debug = false
+        quiet = false
+        logfile = "{{ telegraf_log_dir }}/telegraf.log"
+        hostname = "{{ ansible_hostname }}"
+        omit_hostname = false
+      [[inputs.cpu]]
+        percpu = true
+        totalcpu = true
+        collect_cpu_time = false
+        report_active = false
+      [[inputs.disk]]
+        ignore_fs = ["tmpfs", "devtmpfs", "devfs", "overlay", "aufs", "squashfs"]
+      [[inputs.diskio]]
+      [[inputs.kernel]]
+      [[inputs.mem]]
+      [[inputs.processes]]
+      [[inputs.socket_listener]]
+        service_address = "tcp://127.0.0.1:8094"
+        data_format = "influx"
+      [[inputs.influxdb]]
+        urls = [
+          "http://localhost:8086/debug/vars"
+        ]
+        insecure_skip_verify = true
+      # [[inputs.swap]]
+      # broken at the moment. https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=240570
+      [[inputs.system]]
+      [[inputs.mqtt_consumer]]
+        servers = ["tcp://127.0.0.1:1883"]
+        topics = [
+          "homie/#"
+        ]
+        # topic_tag = "topic"
+        qos = 0
+        client_id = "telegraf"
+
+      [[outputs.influxdb]]
+        urls = ["http://127.0.0.1:8086"]
+        database = "mydatabase"
+        username = "write_only"
+        password = "write_only"
+        skip_database_creation = true
+        insecure_skip_verify = true

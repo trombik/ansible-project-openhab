@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  role_name: freebsd_pkg
+  author: Tomoyuki Sakurai
+  description: Configures pkg.conf(5)
+  company: N/A
+  license: BSD
+  min_ansible_version: 2.0
+  platforms:
+    - name: FreeBSD
+      versions:
+        - 12.0
+  galaxy_tags:
+    - freebsd
+    - pkg

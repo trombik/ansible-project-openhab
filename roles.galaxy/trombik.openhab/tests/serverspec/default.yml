@@ -1,0 +1,59 @@
+---
+- hosts: localhost
+  roles:
+    - role: trombik.apt_repo
+      when: ansible_os_family == 'Debian'
+    - role: trombik.java
+    - role: ansible-role-openhab
+  vars:
+    apt_repo_enable_apt_transport_https: yes
+    apt_repo_keys_to_add:
+      # XXX bintray repo is broken.
+      # https://community.openhab.org/t/the-repository-https-dl-bintray-com-openhab-apt-repo2-stable-release-is-not-signed-raspberry-pi-3/60047/17
+      - https://bintray.com/user/downloadSubjectPublicKey?username=openhab
+    apt_repo_to_add:
+      - deb https://openhab.jfrog.io/openhab/openhab-linuxpkg stable main
+    java_packages: "{% if ansible_os_family == 'FreeBSD' %}[ 'java/openjdk8-jre' ]{% elif ansible_os_family == 'Debian' %}[ 'openjdk-8-jdk' ]{% endif %}"
+
+    openhab_extra_groups:
+      - name: "{% if ansible_os_family == 'Debian' %}dialout{% elif ansible_os_family == 'FreeBSD' %}dialer{% endif %}"
+
+    openhab_configs:
+      - name: services/addons.cfg
+        state: present
+        content: |
+          package = standard
+          remote = true
+          binding = astro,mqtt,ntp
+          ui = basic,paper
+          persistence = rrd4j
+          action = mail
+          transformation = jsonpath,map
+          voice = voicerss
+      - name: services/basicui.cfg
+        content: |
+          org.eclipse.smarthome.basicui:defaultSitemap=demo
+          org.eclipse.smarthome.basicui:iconType=svg
+      - name: services/classicui.cfg
+        content: |
+          org.eclipse.smarthome.classicui:defaultSitemap=demo
+      - name: services/logging.cfg
+        content: |
+          pattern=%date{ISO8601} - %-25logger: %msg%n
+      - name: services/rrd4j.cfg
+        content: ""
+      - name: services/runtime.cfg
+        content: |
+          org.eclipse.smarthome.core.localeprovider:language=en
+      - name: services/foo.cfg
+        state: absent
+        content: |
+          org.eclipse.smarthome.core.localeprovider:language=en
+      - name: scripts/demo.script
+        content: |
+          say("Demo script has been called!")
+    flags_freebsd: ""
+    flags_debian: |
+      EXTRA_JAVA_OPTS=""
+      OPENHAB_HTTP_PORT=8080
+    openhab_flags: "{% if ansible_os_family == 'Debian' %}{{ flags_debian }}{% elif ansible_os_family == 'FreeBSD' %}{{ flags_freebsd }}{% endif %}"

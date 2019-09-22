@@ -1,0 +1,8 @@
+---
+
+- name: trombik.apt_repo
+- name: trombik.java
+- name: trombik.grafana
+- name: trombik.influxdb
+- name: trombik.mosquitto
+- name: trombik.telegraf

@@ -1,0 +1,9 @@
+---
+# tasks file for ansible-role-freebsd_pkg
+
+- include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Create pkg.conf
+  template:
+    src: pkg.conf.j2
+    dest: "{{ freebsd_pkg_conf_file }}"

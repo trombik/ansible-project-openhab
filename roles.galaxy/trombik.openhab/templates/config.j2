@@ -1,0 +1,8 @@
+{% set extention = item.name | basename | splitext | last %}
+{% if extention == '.cfg' %}
+# Managed by ansible
+{% else %}
+// Managed by ansible
+{% endif %}
+
+{{ item.content }}

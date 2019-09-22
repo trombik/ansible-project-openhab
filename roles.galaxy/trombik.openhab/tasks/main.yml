@@ -1,0 +1,70 @@
+---
+# tasks file for ansible-role-openhab
+
+- include_vars: "{{ ansible_os_family }}.yml"
+
+- name: "Include install-{{ ansible_os_family }}.yml"
+  include: "install-{{ ansible_os_family }}.yml"
+
+- name: Create openhab_extra_groups
+  group:
+    name: "{{ item.name }}"
+    state: present
+  with_items: "{{ openhab_extra_groups }}"
+
+- name: Add openhab_user to openhab_extra_groups
+  user:
+    name: "{{ openhab_user }}"
+    append: yes
+    groups: "{{ item.name }}"
+  with_items: "{{ openhab_extra_groups }}"
+  notify:
+    - Restart openhab
+
+- name: Create log directory
+  file:
+    path: "{{ openhab_log_dir }}"
+    mode: 0755
+    owner: "{{ openhab_user }}"
+    group: "{{ openhab_group }}"
+    state: directory
+  notify: Restart openhab
+
+- name: Create db directory
+  file:
+    path: "{{ openhab_db_dir }}"
+    mode: 0755
+    owner: "{{ openhab_user }}"
+    group: "{{ openhab_group }}"
+    state: directory
+  notify: Restart openhab
+
+- name: Create configuration files
+  template:
+    src: config.j2
+    dest: "{{ openhab_conf_dir }}/{{ item.name }}"
+    mode: 0640
+    owner: "{{ openhab_user }}"
+    group: "{{ openhab_group }}"
+  with_items: "{{ openhab_configs }}"
+  when:
+    - "('state' in item and item.state == 'present') or not ('state' in item)"
+  notify:
+    - Restart openhab
+
+- name: Remove configuration files
+  file:
+    path: "{{ openhab_conf_dir }}/{{ item.name }}"
+    state: absent
+  with_items: "{{ openhab_configs }}"
+  when:
+    - "'state' in item"
+    - "item.state == 'absent'"
+  notify:
+    - Restart openhab
+
+- name: Start openhab
+  service:
+    name: "{{ openhab_service }}"
+    enabled: true
+    state: started

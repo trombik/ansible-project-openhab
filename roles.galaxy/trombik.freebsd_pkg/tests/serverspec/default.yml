@@ -1,0 +1,7 @@
+---
+- hosts: localhost
+  roles:
+    - ansible-role-freebsd_pkg
+  vars:
+    freebsd_pkg_config: |
+      IGNORE_OSVERSION=yes

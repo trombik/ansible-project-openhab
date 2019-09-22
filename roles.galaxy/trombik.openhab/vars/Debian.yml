@@ -1,0 +1,8 @@
+---
+__openhab_user: openhab
+__openhab_group: openhab
+__openhab_log_dir: /var/log/openhab2
+__openhab_package_name: openhab2
+__openhab_service: openhab2
+__openhab_db_dir: /var/lib/openhab2
+__openhab_conf_dir: /etc/openhab2

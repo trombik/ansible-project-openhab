@@ -1,0 +1,87 @@
+---
+- hosts: localhost
+  roles:
+    - name: trombik.apt_repo
+      when: ansible_os_family == 'Debian'
+    - ansible-role-grafana
+  vars:
+    apt_repo_keys_to_add:
+      - https://packages.grafana.com/gpg.key
+    apt_repo_enable_apt_transport_https: yes
+    apt_repo_to_add:
+      - "deb https://packages.grafana.com/oss/deb stable main"
+    grafana_extra_packages:
+      - name: zsh
+    grafana_plugins:
+      - name: raintank-worldping-app
+        state: present
+      - name: grafana-clock-panel
+        state: absent
+    flags:
+      FreeBSD: |
+        grafana_conf="{{ grafana_conf_file }}"
+
+    grafana_flags: "{{ flags[ansible_os_family] }}"
+    grafana_admin_user: admin
+    grafana_admin_password: PassWord
+    grafana_addr: "{{ ansible_default_ipv4['address'] }}"
+    grafana_provisioning_files:
+      - name: datasources/influxdb.yml
+        state: present
+        content: |
+          apiVersion: 1
+          datasources:
+            - name: InfluxDB
+              type: influxdb
+              access: proxy
+              database: mydatabase
+              user: read
+              password: read
+              url: http://localhost:8086
+              jsonData:
+                httpMode: GET
+    grafana_config: |
+      [paths]
+      data = {{ grafana_db_dir }}
+      logs = {{ grafana_log_dir }}
+      plugins = /var/db/grafana/plugins
+      provisioning = {{ grafana_provisioning_dir }}
+      [server]
+      [database]
+      log_queries =
+      [session]
+      [dataproxy]
+      [analytics]
+      [security]
+      admin_user = {{ grafana_admin_user }}
+      admin_password = {{ grafana_admin_password }}
+      disable_gravatar = true
+      [snapshots]
+      [dashboards]
+      [users]
+      [auth]
+      [auth.anonymous]
+      [auth.github]
+      [auth.google]
+      [auth.generic_oauth]
+      [auth.grafana_com]
+      [auth.proxy]
+      [auth.basic]
+      [auth.ldap]
+      [smtp]
+      [emails]
+      [log]
+      [log.console]
+      [log.file]
+      [log.syslog]
+      [alerting]
+      [metrics]
+      [metrics.graphite]
+      [tracing.jaeger]
+      [grafana_com]
+      [external_image_storage]
+      [external_image_storage.s3]
+      [external_image_storage.webdav]
+      [external_image_storage.gcs]
+      [external_image_storage.azure_blob]
+      [external_image_storage.local]
