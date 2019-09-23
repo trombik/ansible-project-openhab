@@ -185,20 +185,6 @@ grafana_config: |
   [external_image_storage.azure_blob]
   [external_image_storage.local]
 
-# ____________________ mosquitto
-mosquitto_bind_address: "{{ ansible_all_ipv4_addresses[1] }}"
-mosquitto_config: |
-  user {{ mosquitto_user }}
-  pid_file {{ mosquitto_pid_file }}
-  bind_address {{ mosquitto_bind_address }}
-  port {{ mosquitto_port }}
-  log_dest syslog
-  autosave_interval 1800
-  persistence true
-  persistence_location {{ mosquitto_db_dir }}/
-  persistence_file mosquitto.db
-  log_dest syslog
-
 # ____________________ telegraf
 telegraf_config: |
   [global_tags]
