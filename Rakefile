@@ -135,7 +135,19 @@ task :provision do
   when "staging"
     sh "ansible-playbook -i #{inventory_path} --ssh-common-args '-o \"UserKnownHostsFile /dev/null\" -o \"StrictHostKeyChecking no\"' --user #{run_as_user} playbooks/site.yml"
   when "prod"
-    sh "ansible-playbook -i #{inventory_path} --user #{run_as_user} playbooks/site.yml"
+    sh "ansible-playbook -i #{inventory_path} --user #{run_as_user} --ask-become-pass playbooks/site.yml"
+  end
+end
+
+desc "provision in dry-run mode (--check --diff, not implemented for `virtualbox`)"
+task :dryrun do
+  case ansible_environment
+  when "virtualbox"
+    raise "dryrun is not implemented for `#{ansible_environment}`"
+  when "staging"
+    sh "ansible-playbook -CD -i #{inventory_path} --ssh-common-args '-o \"UserKnownHostsFile /dev/null\" -o \"StrictHostKeyChecking no\"' --user #{run_as_user} playbooks/site.yml"
+  when "prod"
+    sh "ansible-playbook -CD -i #{inventory_path} --user #{run_as_user} --ask-become-pass playbooks/site.yml"
   end
 end
 
