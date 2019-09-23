@@ -59,6 +59,27 @@ def plan_path
   "terraform/plans/#{ansible_environment}"
 end
 
+def run_as_user
+  @user ||= get_run_as_user
+end
+
+def get_run_as_user
+  user = nil
+  if ENV["ANSIBLE_USER"]
+    user = ENV["ANSIBLE_USER"]
+  else
+    case ansible_environment
+    when "virtualbox"
+      user = "vagrant"
+    when "staging"
+      user = "ec2-user"
+    when "prod"
+      user = ENV["USER"]
+    end
+  end
+  user
+end
+
 desc "launch VMs"
 task :up do
   case ansible_environment
@@ -77,6 +98,8 @@ task :up do
     with_retries(retry_opts) do |_attempt_number|
       sh "ansible -i #{inventory_path} --ssh-common-args '-o \"UserKnownHostsFile /dev/null\" -o \"StrictHostKeyChecking no\"' --user 'ec2-user' -m ping all"
     end
+  when "prod"
+    # XXX NOOP
   end
 end
 
@@ -87,6 +110,8 @@ task :status do
     vagrant "status"
   when "staging"
     sh "terraform show"
+  when "prod"
+    # XXX NOOP
   end
 end
 
@@ -97,6 +122,8 @@ task :clean do
     vagrant "destroy -f"
   when "staging"
     sh "terraform destroy -force #{plan_path}"
+  when "prod"
+    # XXX NOOP
   end
 end
 
@@ -106,7 +133,9 @@ task :provision do
   when "virtualbox"
     vagrant "provision"
   when "staging"
-    sh "ansible-playbook -i #{inventory_path} --ssh-common-args '-o \"UserKnownHostsFile /dev/null\" -o \"StrictHostKeyChecking no\"' --user 'ec2-user' playbooks/site.yml"
+    sh "ansible-playbook -i #{inventory_path} --ssh-common-args '-o \"UserKnownHostsFile /dev/null\" -o \"StrictHostKeyChecking no\"' --user #{run_as_user} playbooks/site.yml"
+  when "prod"
+    sh "ansible-playbook -i #{inventory_path} --ssh-common-args --user #{run_as_user} playbooks/site.yml"
   end
 end
 
@@ -180,12 +209,6 @@ namespace :test do
         inventory.all_hosts_in(g).each do |h|
           # XXX pass SUDO_PASSWORD to serverspec if the user is required to
           # type password
-          run_as_user = case ansible_environment
-                        when "virtualbox"
-                          Vagrant::SSH::Config.for(h)["User".downcase]
-                        when "staging"
-                          "ec2-user"
-                        end
           configure_sudo_password_for(run_as_user)
           puts "running serverspec for #{g} on #{h} as user `#{run_as_user}`"
           Vagrant::Serverspec.new(inventory_path).run(group: g, hostname: h)
@@ -198,13 +221,6 @@ namespace :test do
       desc "Run serverspec for group `#{g}`"
       task g.to_sym do |_t|
         inventory.all_hosts_in(g).each do |h|
-          # XXX !DRY
-          run_as_user = case ansible_environment
-                        when "virtualbox"
-                          Vagrant::SSH::Config.for(h)["User".downcase]
-                        when "staging"
-                          "ec2-user"
-                        end
           configure_sudo_password_for(run_as_user)
           puts "running serverspec for #{g} on #{h} as user `#{run_as_user}`"
           Vagrant::Serverspec.new(inventory_path).run(group: g, hostname: h)
@@ -247,18 +263,6 @@ namespace :test do
   end
 
   namespace "integration" do
-    # set the default user name in each environment
-    run_as_user = case ansible_environment
-                  when "virtualbox"
-                    "vagrant"
-                  when "staging"
-                    "ec2-user"
-                  when "prod"
-                    ENV["USER"]
-                  end
-
-    # but if ANSIBLE_USER is defined by the user, override it
-    run_as_user = ENV["ANSIBLE_USER"] if ENV["ANSIBLE_USER"]
     directories = Pathname.glob("spec/integration/[0-9][0-9][0-9]_*")
     directories.each do |d|
       desc "run integration spec #{d.basename}"
