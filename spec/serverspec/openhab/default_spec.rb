@@ -63,7 +63,7 @@ end
 describe "grafana UI" do
   let(:base_uri) { "http://172.16.100.200/grafana" }
 
-  describe "/" do
+  describe "/grafana/" do
     it "is redirected to /grafana/login" do
       uri = "#{base_uri}/"
       res = Net::HTTP.get_response(URI(uri))
