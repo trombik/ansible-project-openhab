@@ -96,7 +96,7 @@ task :up do
       max_tries: 10, base_sleep_seconds: 10, max_sleep_seconds: 30
     }
     with_retries(retry_opts) do |_attempt_number|
-      sh "ansible -i #{inventory_path} --ssh-common-args '-o \"UserKnownHostsFile /dev/null\" -o \"StrictHostKeyChecking no\"' --user 'ec2-user' -m ping all"
+      sh "ansible -i #{inventory_path} --ssh-common-args '-o \"UserKnownHostsFile /dev/null\" -o \"StrictHostKeyChecking no\"' --user #{run_as_user} -m ping all"
     end
   when "prod"
     # XXX NOOP
