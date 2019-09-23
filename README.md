@@ -20,6 +20,12 @@ Provision the VM.
 vagrant provision
 ```
 
+### Web UI locations
+
+| Application | URI |
+|-----------|------------------------------------------------------------------------------|
+| `grafana` | `virtualbox`: [http://172.16.100.200/grafana](http://172.16.100.200/grafana) |
+| `OpenHab` | `virtualbox`: [http://172.16.100.200/](http://172.16.100.200/)               |
 
 ## Create a `mtree` file
 
