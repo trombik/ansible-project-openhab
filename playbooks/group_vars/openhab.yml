@@ -80,7 +80,7 @@ influxdb_tls: no
 influxdb_include_x509_certificate: no
 influxdb_bind_address: 127.0.0.1:8086
 influxdb_databases:
-  - database_name: mydatabase
+  - database_name: "{{ project_influxdb_database }}"
     state: present
 influxdb_users: "{{ project_influxdb_users }}"
 influxdb_config: |
@@ -130,9 +130,9 @@ grafana_provisioning_files:
         - name: InfluxDB
           type: influxdb
           access: proxy
-          database: mydatabase
-          user: "{{ project_influxdb_users[1].user_name }}"
-          password: "{{ project_influxdb_users[1].user_password }}"
+          database: "{{ project_influxdb_database }}"
+          user: "{{ project_influxdb_user['grafana'].user_name }}"
+          password: "{{ project_influxdb_user['grafana'].user_password }}"
           url: http://localhost:8086
           jsonData:
             httpMode: GET
@@ -249,9 +249,9 @@ telegraf_config: |
 
   [[outputs.influxdb]]
     urls = ["http://127.0.0.1:8086"]
-    database = "mydatabase"
-    username = "{{ project_influxdb_users[0].user_name }}"
-    password = "{{ project_influxdb_users[0].user_password }}"
+    database = "{{ project_influxdb_database }}"
+    username = "{{ project_influxdb_user['telegraf'].user_name }}"
+    password = "{{ project_influxdb_user['telegraf'].user_password }}"
     skip_database_creation = true
     insecure_skip_verify = true
 
