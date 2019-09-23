@@ -5,7 +5,7 @@
 - name: trombik.apt_repo
 - name: trombik.java
 - name: trombik.zsh
-- name: trombik.freebsd_pkg
+- name: trombik.freebsd_pkg_repo
 - name: trombik.tmux
 - name: trombik.hosts
 - name: trombik.git
