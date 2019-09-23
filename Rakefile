@@ -135,7 +135,7 @@ task :provision do
   when "staging"
     sh "ansible-playbook -i #{inventory_path} --ssh-common-args '-o \"UserKnownHostsFile /dev/null\" -o \"StrictHostKeyChecking no\"' --user #{run_as_user} playbooks/site.yml"
   when "prod"
-    sh "ansible-playbook -i #{inventory_path} --ssh-common-args --user #{run_as_user} playbooks/site.yml"
+    sh "ansible-playbook -i #{inventory_path} --user #{run_as_user} playbooks/site.yml"
   end
 end
 
