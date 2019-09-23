@@ -1,4 +1,0 @@
----
-freebsd_pkg_conf_dir: /usr/local/etc
-freebsd_pkg_conf_file: "{{ freebsd_pkg_conf_dir }}/pkg.conf"
-freebsd_pkg_config: ""
