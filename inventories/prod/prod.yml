@@ -2,12 +2,12 @@
 all:
   hosts:
     hab.i.trombik.org:
-      ansible_host: 192.168.1.63
+      ansible_host: 192.168.1.101
   children:
     openhab:
       hosts:
         hab.i.trombik.org:
-    prod-credentials:
+    prod_credentials:
       children:
         openhab:
     prod:
