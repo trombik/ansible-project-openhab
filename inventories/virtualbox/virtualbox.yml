@@ -5,12 +5,12 @@ all:
       vagrant_priority: 11
       ansible_host: 172.16.100.200
   children:
-    hab:
+    openhab:
       hosts:
         hab.i.trombik.org:
-    virtualbox-credentials:
+    virtualbox_credentials:
       children:
-        hab:
+        openhab:
     virtualbox:
       children:
-        hab:
+        openhab:

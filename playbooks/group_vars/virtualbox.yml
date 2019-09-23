@@ -1,8 +1,8 @@
 ---
+hosts_map:
+  "172.16.100.200":
+    - hab.i.trombik.org
 hostname_fqdn: "{% if ansible_os_family == 'Debian' %}{{ inventory_hostname.split('.') | first }}{% else %}{{ inventory_hostname }}{% endif %}"
 hosts_enable_localhost: yes
 hosts_extra_localhosts:
   - "{{ inventory_hostname }}"
-hosts_map:
-  "172.16.100.200":
-    - hab.i.trombik.org
