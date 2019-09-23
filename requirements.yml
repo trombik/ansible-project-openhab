@@ -16,3 +16,4 @@
 - name: trombik.telegraf
 - name: trombik.mosquitto
 - name: trombik.openhab
+- name: trombik.nginx
