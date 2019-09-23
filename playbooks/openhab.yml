@@ -27,4 +27,5 @@
     - role: trombik.mosquitto
     - role: trombik.telegraf
     - role: trombik.openhab
+    - role: trombik.nginx
   vars:

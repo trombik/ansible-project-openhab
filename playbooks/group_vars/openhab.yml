@@ -143,6 +143,8 @@ grafana_config: |
   plugins = /var/db/grafana/plugins
   provisioning = {{ grafana_provisioning_dir }}
   [server]
+    domain = {{ ansible_default_ipv4.address }}
+    root_url = %(protocol)s://%(domain)s/grafana/
   [database]
   log_queries =
   [session]
@@ -266,3 +268,45 @@ mosquitto_config: |
 
   # plain MQTT
   listener {{ mosquitto_port }} {{ mosquitto_bind_address }}
+
+# ____________________ nginx
+www_root_dir: "{% if ansible_os_family == 'FreeBSD' %}/usr/local/www/nginx{% elif ansible_os_family == 'OpenBSD' %}/var/www/htdocs{% elif ansible_os_family == 'Debian' %}/var/www/html{% elif ansible_os_family == 'RedHat' %}/usr/share/nginx/html{% endif %}"
+nginx_flags: -q
+nginx_config: |
+  {% if ansible_os_family == 'Debian' or ansible_os_family == 'RedHat' %}
+  user {{ nginx_user }};
+  pid /run/nginx.pid;
+  {% endif %}
+  worker_processes 1;
+  error_log {{ nginx_error_log_file }};
+  events {
+    worker_connections 1024;
+  }
+  http {
+    include {{ nginx_conf_dir }}/mime.types;
+    access_log {{ nginx_access_log_file }};
+    default_type application/octet-stream;
+    sendfile on;
+    keepalive_timeout 65;
+    include {{ nginx_conf_fragments_dir }}/openhab.conf;
+  }
+nginx_config_fragments:
+  - name: openhab.conf
+    config: |
+      server {
+        listen 80;
+        root {{ www_root_dir }};
+        index index.html index.htm;
+        location /grafana/ {
+          proxy_pass http://localhost:3000/;
+        }
+        # XXX OpenHab does not support sub-directory in URL
+        location / {
+          proxy_pass                          http://localhost:8080/;
+          proxy_set_header Host               $http_host;
+          proxy_set_header X-Real-IP          $remote_addr;
+          proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto  $scheme;
+        }
+      }
+    state: present
