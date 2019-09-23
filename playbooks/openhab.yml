@@ -24,6 +24,7 @@
     - role: trombik.java
     - role: trombik.grafana
     - role: trombik.influxdb
+    - role: trombik.mosquitto
     - role: trombik.telegraf
     - role: trombik.openhab
   vars:
