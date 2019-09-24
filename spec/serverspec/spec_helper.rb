@@ -49,7 +49,7 @@ end
 options[:proxy] = proxy if proxy
 
 set :backend, :ssh
-# set :sudo_password, ENV["SUDO_PASSWORD"] if ENV.key?("SUDO_PASSWORD")
+set :sudo_password, ENV["SUDO_PASSWORD"] if ENV.key?("SUDO_PASSWORD")
 
 set :host, host
 set :ssh_options, options
