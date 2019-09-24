@@ -225,13 +225,14 @@ telegraf_config: |
   # broken at the moment. https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=240570
   [[inputs.system]]
   [[inputs.mqtt_consumer]]
-    servers = ["tcp://127.0.0.1:1883"]
+    servers = ["tcp://{{ mosquitto_bind_address }}:{{ mosquitto_port }}"]
     topics = [
-      "homie/#"
+      "homie/+/bmp280/influx"
     ]
     # topic_tag = "topic"
     qos = 0
     client_id = "telegraf"
+    data_format = "influx"
 
   [[outputs.influxdb]]
     urls = ["http://127.0.0.1:8086"]
