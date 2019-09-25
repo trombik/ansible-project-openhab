@@ -55,5 +55,5 @@
 - name: Create sudoer
   template:
     src: sudoers.j2
-    dest: "{{ sudo_config_dir }}/sudoer"
+    dest: "{{ sudo_config_dir }}/sudoers"
     validate: visudo -cf %s

@@ -9,7 +9,7 @@ config_dir = case os[:family]
                "/etc"
              end
 confd_dir = "#{config_dir}/sudoers.d"
-config = "#{config_dir}/sudoer"
+config = "#{config_dir}/sudoers"
 flagments = %w[vagrant buildbot]
 default_group = case os[:family]
                 when "freebsd", "openbsd"
