@@ -42,7 +42,7 @@ openhab_configs:
       package = standard
       remote = true
       binding = astro,mqtt,ntp
-      ui = basic,paper
+      ui = basic,paper,habpanel
       persistence = rrd4j
       action = mail
       transformation = jsonpath,map
@@ -150,6 +150,8 @@ grafana_config: |
   [session]
   [dataproxy]
   [analytics]
+    reporting_enabled = false
+    check_for_updates = false
   [security]
   admin_user = {{ grafana_admin_user }}
   admin_password = {{ grafana_admin_password }}
