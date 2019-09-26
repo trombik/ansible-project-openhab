@@ -137,7 +137,6 @@ grafana_provisioning_files:
           url: http://localhost:8086
           jsonData:
             httpMode: GET
-      datasources:
         - name: InfluxDB for anonymous
           orgId: 2
           type: influxdb
