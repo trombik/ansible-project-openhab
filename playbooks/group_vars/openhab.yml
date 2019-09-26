@@ -128,6 +128,18 @@ grafana_provisioning_files:
       apiVersion: 1
       datasources:
         - name: InfluxDB
+          orgId: 1
+          type: influxdb
+          access: proxy
+          database: "{{ project_influxdb_database }}"
+          user: "{{ project_influxdb_user['grafana'].user_name }}"
+          password: "{{ project_influxdb_user['grafana'].user_password }}"
+          url: http://localhost:8086
+          jsonData:
+            httpMode: GET
+      datasources:
+        - name: InfluxDB for anonymous
+          orgId: 2
           type: influxdb
           access: proxy
           database: "{{ project_influxdb_database }}"
@@ -156,11 +168,15 @@ grafana_config: |
   admin_user = {{ grafana_admin_user }}
   admin_password = {{ grafana_admin_password }}
   disable_gravatar = true
+  allow_embedding = true
   [snapshots]
   [dashboards]
   [users]
   [auth]
   [auth.anonymous]
+    enabled = true
+    org_name = anonymous
+    org_role = Viewer
   [auth.github]
   [auth.google]
   [auth.generic_oauth]
