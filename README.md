@@ -80,6 +80,12 @@ Test the system.
 bundle exec rake test:serverspec:all
 ```
 
+Login to the system (only for `virtualbox` environment).
+
+```
+vagrant ssh hab.i.trombik.org
+```
+
 Destroy the VM.
 
 ```
@@ -200,9 +206,10 @@ Users login to `grafana` first. Then, open `OpenHab` UI.
 2. Assign the user to role `Viewer`
 
 Pros:
-    * Existing `grafana` panels and dashboards can be reused without
-      modification
-    * Anonymous access is not allowed
+
+* Existing `grafana` panels and dashboards can be reused without
+  modification
+* Anonymous access is not allowed
 
 Cons:
     * Users need to login to `grafana` before seeing the graphs
@@ -219,8 +226,9 @@ Users do not login to `grafana`. They do nothing to view `OpenHab` UI with
    users
 
 Pros:
-    * Users do not need to login to `grafana`
-    * No need to lower the default security
+
+* Users do not need to login to `grafana`
+* No need to lower the default security
 
 Cons:
     * A `grafana` organization for anonymous users is required
