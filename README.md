@@ -27,6 +27,38 @@ sensors that I created for myself. Project requirements include:
 * A Unix account that can run `sudo(1)` as root
 * `python`
 
+### Tested hardware and OS
+
+The system is tested on Ubuntu 1803, and deployed to a [Orange Pi Lite 2]
+(http://www.orangepi.org/Orange%20Pi%20Lite%202/) with `armbian`.
+
+## Components used in the system
+
+The system is built on a single machine. It is possible to deploy each
+components in the project on multiple machines by modifying `ansible` group
+variables and inventory files.
+
+### `OpenHab`
+
+The core component for general management of devices.
+
+### `influxdb` and `grafana`
+
+They are used for persistent metrics storage and graphical representation of
+metrics.
+
+### `telegraf`
+
+`telegraf` is used as a metric collector from MQTT topics and from other
+sources, such as local machine. Note that `OpenHab` is NOT used to collect
+metrics even though it has a feature for that. `OpenHab` does subscribe to
+topics for metrics at one point, but dose nothing for persistent metrics.
+
+### MQTT server
+
+`mosquitto` is used as MQTT server where devices can publish metrics, and
+subscribe command topics.
+
 ## Environments
 
 The project provides two environments. One for development and tests, and
