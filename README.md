@@ -29,8 +29,8 @@ sensors that I created for myself. Project requirements include:
 
 ### Tested hardware and OS
 
-The system is tested on Ubuntu 1803, and deployed to a [Orange Pi Lite 2]
-(http://www.orangepi.org/Orange%20Pi%20Lite%202/) with `armbian`.
+The system is tested on Ubuntu 1803, and deployed to a
+[Orange Pi Lite 2](http://www.orangepi.org/Orange%20Pi%20Lite%202/) with `armbian`.
 
 ## Components used in the system
 
