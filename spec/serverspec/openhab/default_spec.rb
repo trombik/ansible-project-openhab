@@ -73,3 +73,16 @@ describe "grafana UI" do
     end
   end
 end
+
+describe "nginx status page" do
+  describe command "curl -v http://localhost/status" do
+    its(:exit_status) { should eq 0 }
+    its(:stdout) { should match(%r{HTTP/1.1 200 OK}) }
+    its(:stdout) { should match(/Active connections:\s+\d+/) }
+  end
+
+  describe command "curl -v http://172.16.100.200/status" do
+    its(:exit_status) { should eq 0 }
+    its(:stdout) { should match(%r{HTTP/1.1 403 Forbidden}) }
+  end
+end
