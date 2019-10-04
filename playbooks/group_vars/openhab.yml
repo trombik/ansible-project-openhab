@@ -307,7 +307,11 @@ project_nginx_extra_packages:
   Debian:
     - apache2-utils
 nginx_extra_packages: "{{ project_nginx_extra_packages[ansible_os_family] }}"
-www_root_dir: "{% if ansible_os_family == 'FreeBSD' %}/usr/local/www/nginx{% elif ansible_os_family == 'OpenBSD' %}/var/www/htdocs{% elif ansible_os_family == 'Debian' %}/var/www/html{% elif ansible_os_family == 'RedHat' %}/usr/share/nginx/html{% endif %}"
+www_root_dir:
+  FreeBSD: /usr/local/www/nginx
+  OpenBSD: /var/www/htdocs
+  Debian: /var/www/html
+  RedHat: /usr/share/nginx/html
 nginx_flags: -q
 nginx_config: |
   {% if ansible_os_family == 'Debian' or ansible_os_family == 'RedHat' %}
@@ -332,7 +336,7 @@ nginx_config_fragments:
     config: |
       server {
         listen 80;
-        root {{ www_root_dir }};
+        root {{ www_root_dir[ansible_os_family] }};
         index index.html index.htm;
         location /grafana/ {
           proxy_pass http://localhost:3000/;
