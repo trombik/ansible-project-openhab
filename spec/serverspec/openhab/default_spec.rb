@@ -9,6 +9,7 @@ ports = [
   8080, # OpenHab UI
   3000, # grafana
   8094, # telegraf
+  8125, # telegraf statsd listener
   1883  # mosquitto
 ]
 services = %w[

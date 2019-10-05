@@ -278,6 +278,8 @@ telegraf_config: |
     record_type = "NS"
   [[inputs.ping]]
     urls = ["example.org"]
+  [[inputs.statsd]]
+    service_address = ":8125"
   [[outputs.influxdb]]
     urls = ["http://127.0.0.1:8086"]
     database = "{{ project_influxdb_database }}"
